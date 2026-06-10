@@ -1,7 +1,7 @@
-echo ".DS_Store
+.DS_Store
 Thumbs.db
 *.pem
 *.crx
 *.zip
 .vscode/
-.idea/" > .gitignore
+.idea/
