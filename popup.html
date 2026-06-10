@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <title>时空书签 · 纪元版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 浅色主题 - 使用中性蓝灰色 */
+        :root {
+            --accent: #3b82f6;
+            --accent-soft: rgba(59, 130, 246, 0.12);
+            --accent-hover: #2563eb;
+            --bg: #ffffff;
+            --bg-elevated: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            --radius-card: 24px;
+            --scrollbar-thumb: #cbd5e1;
+            --scrollbar-track: #f1f5f9;
+        }
+
+        /* 深色主题 - 配套的冷灰色 */
+        [data-theme="dark"] {
+            --accent: #60a5fa;
+            --accent-soft: rgba(96, 165, 250, 0.15);
+            --accent-hover: #3b82f6;
+            --bg: #0f172a;
+            --bg-elevated: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --scrollbar-thumb: #475569;
+            --scrollbar-track: #1e293b;
+        }
+
+        body {
+            width: 800px;
+            height: 600px;
+            background: var(--bg);
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            overflow: hidden;
+            border-radius: 32px;
+            transition: background 0.2s;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--bg);
+        }
+
+        .header {
+            padding: 20px 24px 12px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 16px;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .badge {
+            font-size: 11px;
+            background: var(--accent-soft);
+            padding: 4px 10px;
+            border-radius: 40px;
+            color: var(--accent);
+        }
+
+        .search-container {
+            position: relative;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px 12px 44px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            font-size: 14px;
+            outline: none;
+            color: var(--text);
+            transition: 0.2s;
+        }
+        #searchInput:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .search-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-left: 16px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .btn {
+            background: var(--bg-elevated);
+            border: none;
+            border-radius: 32px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        .btn:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .timeline-group {
+            margin-bottom: 28px;
+        }
+        .group-header {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bookmarks-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bookmark-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-card);
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .bookmark-item:hover {
+            transform: translateX(4px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+        .bookmark-info {
+            flex: 1;
+        }
+        .bookmark-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .bookmark-url {
+            font-size: 11px;
+            font-family: monospace;
+            color: var(--text-muted);
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+        .bookmark-summary {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .bookmark-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .keywords {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .keyword {
+            background: var(--accent-soft);
+            padding: 2px 8px;
+            border-radius: 30px;
+            font-size: 9px;
+            color: var(--accent);
+        }
+
+        /* 推荐面板 - 固定宽度 280px，动态定位 */
+        .recommendation-panel {
+            position: fixed;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 16px;
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+        }
+        .recommendation-panel.show {
+            display: block;
+        }
+        .recommend-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rec-close {
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+        }
+        .rec-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.1s;
+        }
+        .rec-item:hover {
+            color: var(--accent);
+            padding-left: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .batch-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(100%);
+            transition: 0.2s;
+            z-index: 100;
+        }
+        .batch-bar.show {
+            transform: translateY(0);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 2000;
+        }
+        .modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--bg);
+            border-radius: 32px;
+            width: 400px;
+            padding: 24px;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--text);
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        /* 工具下拉菜单 (备份/恢复/去重) */
+        .tools-dropdown {
+            position: fixed;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 0;
+            width: 160px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .tools-dropdown.show {
+            display: block;
+        }
+        .tools-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .tools-dropdown button:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="brand">
+            <span class="logo">⏳ 时空书签 · 纪元版</span>
+            <span class="badge">语义检索 | 时间流</span>
+        </div>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="例如：“上周的AI文章”、“2024年Vue教程”">
+        </div>
+        <div class="search-hint">✨ 自然语言搜索：支持时间范围（今天/昨天/本周/2024年）+ 关键词模糊匹配</div>
+        <div class="toolbar">
+            <button class="btn" id="toolsBtn">🛠️ 工具</button>
+            <button class="btn btn-primary" id="quickSaveBtn">✨ 一键保存</button>
+            <button class="btn" id="themeToggle">🌓 主题</button>
+            <button class="btn" id="refreshBtn">🔄 刷新</button>
+        </div>
+    </div>
+    <div class="content" id="content">
+        <div id="timelineContainer"></div>
+    </div>
+</div>
+
+<!-- 推荐面板 -->
+<div class="recommendation-panel" id="recPanel">
+    <div class="recommend-title">
+        <span>📚 相似推荐</span>
+        <span class="rec-close" id="recCloseBtn">✕</span>
+    </div>
+    <div id="recList"></div>
+</div>
+
+<!-- 工具下拉菜单（备份、恢复、去重） -->
+<div class="tools-dropdown" id="toolsDropdown">
+    <button id="backupBtn">💾 备份书签</button>
+    <button id="restoreBtn">↩️ 恢复备份</button>
+    <button id="dedupBtn">🧹 去重</button>
+</div>
+
+<!-- 批量栏 -->
+<div class="batch-bar" id="batchBar">
+    <span>选中 <span id="selectedCount">0</span> 项</span>
+    <div><button class="btn" id="batchDeleteBtn">删除</button><button class="btn" id="batchCancelBtn">取消</button></div>
+</div>
+
+<!-- 快速保存模态框 -->
+<div class="modal" id="saveModal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 16px;">📎 快速收藏</h3>
+        <input type="text" id="modalTitle" placeholder="标题">
+        <input type="text" id="modalUrl" placeholder="网址">
+        <textarea id="modalNote" rows="3" placeholder="备注（自动摘录会填充）"></textarea>
+        <div class="modal-buttons">
+            <button class="btn" id="modalCancel">取消</button>
+            <button class="btn btn-primary" id="modalSave">保存</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="importFileInput" accept=".json" style="display:none;">
+
+<script src="popup.js"></script>
+</body>
+</html>

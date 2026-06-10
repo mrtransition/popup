@@ -1,0 +1,7 @@
+echo ".DS_Store
+Thumbs.db
+*.pem
+*.crx
+*.zip
+.vscode/
+.idea/" > .gitignore

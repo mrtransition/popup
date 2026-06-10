@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "时空书签 · 纪元版",
+  "version": "3.0.0",
+  "description": "时空书签 · 纪元版 | 自然语言搜索、时间线分组、智能推荐、一键保存、备份恢复、批量管理",
+  "permissions": ["bookmarks", "tabs", "storage"],
+  "host_permissions": [],
+  "optional_permissions": [],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "时空书签 · 纪元版",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "快速保存当前页面"
+    }
+  }
+}
